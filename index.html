@@ -732,7 +732,8 @@ modal.addEventListener('click',e=>{
  if(b.hasAttribute('data-answer'))pickAnswer(Number(b.dataset.answer));
  if(b.hasAttribute('data-confirm')&&pendingAnswer!==null)selectAnswer(pendingAnswer);
  if(b.hasAttribute('data-final'))showFinal(b.dataset.final);
- if(b.hasAttribute('data-chapter')){const status=modal.querySelector('#chapter-status');if(window.HODDelivery){window.HODDelivery.openChapter(calculateResult(choices,D).growth,status);}else{status.textContent='Это демоверсия. Отправка PDF станет доступна после подключения бота.';status.hidden=false;}}
+ if(b.hasAttribute('data-chapter')){const status=modal.querySelector('#chapter-status');const role=calculateResult(choices,D).growth;if(window.HODDelivery?.getLink(role)){b.removeAttribute('data-chapter');b.setAttribute('data-return-chat',role);b.innerHTML='Вернуться в чат<span aria-hidden="true">↗</span>';modal.querySelector('.chapter-delivery').textContent='Нажмите «Вернуться в чат», чтобы получить PDF с рекомендованной главой. Загрузка файла может занять немного времени.';status.textContent='Ваша глава готова к получению';status.hidden=false;b.before(status);}else{status.textContent='Получение этой главы пока недоступно. Попробуйте позже.';status.hidden=false;}}
+ else if(b.hasAttribute('data-return-chat')){window.HODDelivery.openChapter(b.dataset.returnChat,modal.querySelector('#chapter-status'));}
  if(b.hasAttribute('data-restart'))restart();
 });
 modal.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const a=[...modal.querySelectorAll('button:not(:disabled)')];if(!a.length)return;if(e.shiftKey&&(document.activeElement===a[0]||document.activeElement===modal.querySelector('.question'))){e.preventDefault();a.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===a.at(-1)){e.preventDefault();a[0].focus()}});
