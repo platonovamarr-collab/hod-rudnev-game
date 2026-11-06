@@ -50,6 +50,14 @@ body{height:var(--app-height,100dvh)}.mast{left:28px;right:28px;top:calc(20px + 
 @media(max-width:600px){.world{background-size:60px 60px,60px 60px,100% 100%,auto 100%}}
 
 .sound-toggle{font:600 11px/1.3 var(--font);color:var(--teal);border:1px solid #9dbdc2;border-radius:20px;background:#fff9edcc;padding:8px 11px;cursor:pointer;white-space:nowrap}.sound-toggle:hover{background:#deeff0}.sound-toggle:focus-visible{outline:2px solid var(--teal);outline-offset:3px}.question-top .sound-toggle{margin-left:auto;font-size:10px;padding:5px 9px}.question-top:has(.sound-toggle){gap:10px}@media(max-width:600px){.mast-actions{gap:9px}.mast .sound-toggle{font-size:9px;padding:6px 8px}.question-top:has(.sound-toggle){flex-wrap:wrap}.question-top .sound-toggle{order:3;margin-left:0}.question-top .task-tag{margin-left:auto}}
+
+/* Approved explanatory first screen; keep the start action accessible on small screens. */
+.dock.intro{left:5vw;top:calc(95px + var(--tg-top,0px));bottom:calc(40px + var(--tg-bottom,0px));transform:none;width:min(520px,43vw);display:flex;flex-direction:column;gap:0;background:var(--paper);padding:24px;border:1px solid #d8c4a3;border-radius:14px;box-sizing:border-box;overflow:hidden}
+.dock.intro .dock-heading{flex:0 0 auto}.dock.intro .eyebrow{margin-bottom:12px}.dock.intro h1{font-size:clamp(26px,3vw,40px);line-height:1.13;margin:0 0 18px;letter-spacing:-.8px}
+.dock.intro .dock-copy{display:block;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-width:thin}.dock.intro .description{max-width:none;font-size:15px;line-height:1.65;margin:0 0 17px}.dock.intro .intro-benefit{margin-bottom:4px;font-weight:600}
+.dock.intro .dock-action{flex:0 0 auto;padding-top:18px;margin:0}.dock.intro .button{box-sizing:border-box;min-height:48px}.intro-open #viewport{opacity:.65}
+@media(max-width:600px){.dock.intro{left:14px;right:14px;top:calc(80px + var(--tg-top,0px));bottom:calc(24px + var(--tg-bottom,0px));width:auto;padding:20px;z-index:7}.dock.intro .eyebrow{font-size:9px;margin-bottom:10px}.dock.intro h1{font-size:29px;margin-bottom:16px}.dock.intro .description{font-size:14px;line-height:1.65;margin-bottom:16px}.dock.intro .dock-action{padding-top:14px}.dock.intro .button{font-size:13px;padding:12px 15px;gap:12px}.intro-open #viewport{opacity:.16}}
+@media(max-width:360px){.dock.intro{padding:16px}.dock.intro h1{font-size:26px}.dock.intro .description{font-size:13px}}
 </style></head><body><header class="mast"><div class="logo"><img src="assets__hod-logo.svg" alt="ХОД" width="764" height="230"></div><div class="mast-actions"><button class="sound-toggle" data-sound-toggle aria-pressed="true" aria-label="Выключить звук">Звук вкл.</button><div class="counter"><small>Ваш маршрут</small><small id="counter">0 / 12</small></div></div></header><div id="viewport" aria-label="Игровое поле с 12 точками"><div class="world" id="world"></div></div><section class="dock" id="dock"></section><div class="scope">Работа · Близкие · Ваши планы</div><div class="modal-layer" id="modal"></div><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="delivery-config.js"></script><script src="telegram-delivery.js"></script><script>try{window.Telegram?.WebApp?.ready();window.Telegram?.WebApp?.expand();}catch(_){}</script><script src="assets__gsap.min.js"></script><script id="scene-data" type="application/json">{
   "scenes": [
     {
@@ -666,7 +674,7 @@ function syncViewport(){
 function overview(animate=true){
 syncViewport();
 if(layoutKind!==(innerWidth<=600?'phone':'wide')){renderMap();updateStops();}
-viewport.style.bottom=(innerHeight-dock.getBoundingClientRect().top+18)+'px';
+viewport.style.bottom=mode==='intro'?'35px':(innerHeight-dock.getBoundingClientRect().top+18)+'px';
 const r=viewport.getBoundingClientRect();scale=Math.min(r.width/mapWidth,r.height/mapHeight)*.98;tx=(r.width-mapWidth*scale)/2;ty=(r.height-mapHeight*scale)/2;
 return new Promise(resolve=>{gsap.to(world,{x:tx,y:ty,scale,duration:animate&&!reduced()?.85:0,ease:'power3.inOut',overwrite:true,onComplete:resolve});});
 }
@@ -675,10 +683,10 @@ world.querySelectorAll('.stop').forEach((b,i)=>{const available=i===current&&cur
 document.querySelector('#counter').textContent=`${done.size} / 12`;
 }
 function showIntro(){
-mode='intro';dock.className='dock';dock.innerHTML=`<div class="dock-heading"><div class="eyebrow">Работа · Близкие · Ваши планы</div><h1>Пока вы были <span class="highlight">недоступны</span></h1></div><div class="dock-copy"><p class="description">Один день. Двенадцать ситуаций.<br>Последствия ваших решений.</p><p class="description intro-benefit">Узнайте, в чём ваша сила и какой подход откроет для вас новые возможности.</p></div><div class="dock-action"><button class="button" data-start>Сделать первый ход<span aria-hidden="true">↗</span></button></div>`;updateStops();
+mode='intro';document.body.classList.add('intro-open');dock.className='dock intro';dock.innerHTML=`<div class="dock-heading"><div class="eyebrow">Работа · Близкие · Ваши планы</div><h1>Как вы действуете, когда выбор за вами?</h1></div><div class="dock-copy"><p class="description">Взять управление на себя или довериться команде? Отстоять своё решение или искать договорённость? Сохранить проверенное или рискнуть ради нового?</p><p class="description">Перед вами 12 ситуаций из работы и жизни. Выбирайте, как поступили бы сами: здесь нет правильных ответов и необходимости выглядеть лучше.</p><p class="description">По вашим решениям игра определит ведущий архетип — привычный способ использовать свои сильные стороны. А затем предложит другой подход, который поможет дополнить ваш.</p><p class="description intro-benefit">В результате — ваш разбор, рекомендация для развития и конкретное упражнение, с которого можно начать.</p></div><div class="dock-action"><button class="button" data-start>Сделать первый ход<span aria-hidden="true">↗</span></button></div>`;updateStops();
 }
 async function openPoint(){
-if(busy||current>=scenes.length)return;busy=true;pendingAnswer=null;mode='zoom';updateStops();
+if(busy||current>=scenes.length)return;document.body.classList.remove('intro-open');busy=true;pendingAnswer=null;mode='zoom';updateStops();
 await new Promise(resolve=>gsap.to(dock,{autoAlpha:0,duration:reduced()?0:.2,onComplete:resolve}));
 const r=viewport.getBoundingClientRect(),[x,y]=points[current],zoom=Math.max(scale*2.8,.95);
 await new Promise(resolve=>gsap.to(world,{x:r.width/2-x*zoom,y:r.height/2-y*zoom,scale:zoom,duration:reduced()?0:.9,ease:'power3.inOut',overwrite:true,onComplete:resolve}));
